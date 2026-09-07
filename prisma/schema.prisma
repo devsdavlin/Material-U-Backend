@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Warehouse {
+  id_warehouse   Int      @id @default(autoincrement())
+  warehouse_name String   @db.VarChar
+  activo         Boolean? @default(true)
+  users          User[]
+
+  @@map("warehouse")
+}
+
+model User {
+  id_user       Int       @id @default(autoincrement())
+  warehouse_id  Int
+  email         String    @unique @db.VarChar
+  password_hash String    @db.VarChar
+  rol           String    @db.VarChar
+  activo        Boolean?  @default(true)
+  warehouse     Warehouse @relation(fields: [warehouse_id], references: [id_warehouse], onDelete: Restrict)
+
+  @@map("users")
+}

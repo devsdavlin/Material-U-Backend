@@ -8,6 +8,7 @@ export const createUserSchema = z.object({
   rol: userRules.rolrule,
   warehouse_id: userRules.warehouserule_login.optional(),
 }).superRefine((data, ctx) => {
+  
   if (data.rol === 'Almacenista' && !data.warehouse_id) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
