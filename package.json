@@ -25,6 +25,7 @@
     "zod": "^4.5.2"
   },
   "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.17.0",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
@@ -32,11 +33,16 @@
     "@types/node": "^26.4.0",
     "@types/pg": "^8.23.1",
     "prisma": "^6.4.1",
+    "prisma-erd-generator": "^3.2.1",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2"
   },
   "allowScripts": {
     "bcrypt@6.0.0": true,
-    "esbuild@0.28.2": true
+    "esbuild@0.28.2": true,
+    "@prisma/client@6.4.1": true,
+    "@prisma/engines@6.4.1": true,
+    "prisma@6.4.1": true,
+    "puppeteer@25.10.0": true
   }
 }
