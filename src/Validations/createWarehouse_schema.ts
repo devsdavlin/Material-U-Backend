@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { warehouseRules } from "./rules.js";
+import { warehouseRules } from "./rules_User.js";
 
 export const createWarehouseSchema = z.object({
   warehouse_name: warehouseRules.warehouse_creation,
