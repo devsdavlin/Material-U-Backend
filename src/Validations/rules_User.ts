@@ -13,7 +13,10 @@ export const userRules = {
     .string()
     .trim()
     .toLowerCase()
-    .email("Correo inválido"),
+    .email("Correo inválido")
+    .endsWith("@gmail.com", {
+        message: "Debes usar un correo de Gmail",
+        }),
     
     //schema password
     passrule: z
