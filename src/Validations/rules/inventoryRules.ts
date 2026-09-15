@@ -1,5 +1,5 @@
 import {z} from "zod";
-import { userRules } from "./rules_User.js"; 
+import { userRules } from "./userRules.js"; 
 
 export const materialsRules = {
 
@@ -16,7 +16,7 @@ export const materialsRules = {
     .min
     (3, {message: "La categoría debe tener al menos 3 caracteres" })
     .max(150, {message: "La categoría debe tener como máximo 150 caracteres" }),
-    
+     
     //schema unit of measure
     unitRule: z
     .string()
@@ -37,7 +37,7 @@ export const materialsRules = {
 }
 
 export const inventoryRules = {
-    
+     
     //reutilizar logica
     warehouseIdRule: userRules.warehouserule_login,
 

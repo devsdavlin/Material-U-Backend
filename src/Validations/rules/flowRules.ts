@@ -8,8 +8,6 @@ export const createEntrySchema = z.object({
   unit_value: z.number().nonnegative("El valor unitario no puede ser negativo")
 });
 
-export type CreateEntryType = z.infer<typeof createEntrySchema>;
-
 export const createExitSchema = z.object({
   exit_number: z.string().min(1, "El número de salida o vale es obligatorio"),
   internal_code: z.string().min(1, "El código interno del material es obligatorio"),
@@ -17,5 +15,3 @@ export const createExitSchema = z.object({
   quantity: z.number().positive("La cantidad debe ser mayor a 0"),
   unit_value: z.number().nonnegative("El valor unitario no puede ser negativo")
 });
-
-export type CreateExitType = z.infer<typeof createExitSchema>;

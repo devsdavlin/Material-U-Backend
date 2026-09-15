@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { materialsRules } from "./rules_Inventory.js";
+import { materialsRules } from "./rules/inventoryRules.js";
 
 export const createMaterialSchema = z.object({
   material_name: materialsRules.MaterialNameRule,

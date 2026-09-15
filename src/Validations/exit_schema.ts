@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createExitSchema } from "./rules_flow_materials.js";
+import { createExitSchema } from "./rules/flowRules.js";
 
 export const exitSchema = createExitSchema.extend({
   warehouse_id: z.number().int().positive("El ID de la sede es obligatorio"),

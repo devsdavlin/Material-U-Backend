@@ -41,11 +41,9 @@ export const warehouseRules = {
     .min(3, "El nombre de la sede debe tener al menos 3 caracteres")
     .max(100, "El nombre no puede superar los 100 caracteres")
     .trim(),
-    
+     
   activo: z
     .boolean()
     .optional()
     .default(true)
 };
-
-

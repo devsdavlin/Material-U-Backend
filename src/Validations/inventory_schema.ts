@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { inventoryRules } from "./rules_Inventory.js";
+import { inventoryRules } from "./rules/inventoryRules.js";
 
 export const createInventorySchema = z.object({
   warehouse_id: inventoryRules.warehouseIdRule,

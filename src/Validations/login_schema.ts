@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { userRules } from "./rules_User.js"; 
+import { userRules } from "./rules/userRules.js"; 
 
 export const loginSchema = z.object({
   email: userRules.emailSchema,
