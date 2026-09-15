@@ -28,6 +28,6 @@ export const testDbConnection = async (): Promise<void> => {
       console.log("✅ Conexión a la base de datos establecida (Prisma):", result[0]);
   } catch (error) {
       console.error("❌ Error al conectar a la base de datos con Prisma:", error);
-      process.exit(1);
+      throw error;
   }
 };

@@ -27,7 +27,13 @@ export const materialsRules = {
     activeRule: z
     .boolean()
     .optional()
-    .default(true)
+    .default(true),
+
+    //Internal code Rule
+    internalCodeRule: z
+    .string()
+    .min(1, {message: "El código interno debe tener al menos 1 caracter" })
+    .max(50, {message: "El código interno debe tener como máximo 50 caracteres" })
 }
 
 export const inventoryRules = {

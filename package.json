@@ -2,16 +2,18 @@
   "name": "inventario",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.js",
-  "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "typecheck": "tsc --noEmit",
-    "db:generate": "prisma generate",
-    "db:pull": "prisma db pull",
-    "db:push": "prisma db push"
-  },
+    "main": "dist/server.js",
+    "scripts": {
+      "dev": "tsx watch src/server.ts",
+      "build": "tsc",
+      "start": "node dist/server.js",
+      "typecheck": "tsc --noEmit",
+      "db:generate": "prisma generate",
+      "db:pull": "prisma db pull",
+      "db:push": "prisma db push",
+      "db:deploy": "prisma migrate deploy",
+      "db:status": "prisma migrate status"
+    },
   "keywords": [],
   "type": "module",
   "dependencies": {
@@ -20,6 +22,8 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
     "zod": "^4.5.2"

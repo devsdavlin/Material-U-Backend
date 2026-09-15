@@ -71,8 +71,11 @@ model inventory {
   warehouse_id  Int
   material_id   Int
   current_stock Decimal   @default(0) @db.Decimal(10, 2)
+  min_stock     Decimal   @default(0) @db.Decimal(14, 2)
   materials     materials @relation(fields: [material_id], references: [id_material], onDelete: NoAction, onUpdate: NoAction, map: "fk_material")
   warehouse     Warehouse @relation(fields: [warehouse_id], references: [id_warehouse], onDelete: NoAction, onUpdate: NoAction, map: "fk_warehouse")
+
+  @@unique([warehouse_id, material_id], map: "unique_warehouse_material")
 }
 
 model materials {
@@ -81,6 +84,7 @@ model materials {
   category      String      @db.VarChar(100)
   unit          String      @db.VarChar(50)
   activo        Boolean?    @default(true)
+  internal_code String?     @unique @db.VarChar(50)
   entries       entries[]
   exits         exits[]
   inventory     inventory[]

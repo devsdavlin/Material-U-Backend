@@ -31,7 +31,7 @@ export const loginUser = async (loginData: LoginType) => {
     const user = await prisma.user.findUnique({
         where: {email: loginData.email},
     })
-    if (!user) {
+    if (!user || !user.activo) {
         throw new Error('Credenciales inválidas');
     }
     const isPasswordValid = await bcrypt.compare(loginData.password, user.password_hash);

@@ -1,14 +1,14 @@
 import { type Request, type Response, type NextFunction } from 'express';
-import type { ZodType } from 'zod';
+import type { ZodTypeAny } from 'zod';
 
-export const validate_user = (schema: ZodType) => {
+export const validate_user = (schema: ZodTypeAny) => {
   return (req: Request, res: Response, next: NextFunction) => {
 
         const result = schema.safeParse(req.body);
             if (!result.success) {
                 const errors = result.error.issues.map((issue) => {
                     return {
-                        camp: issue.path.join('.'),
+                        field: issue.path.join('.'),
                         message: issue.message,
                     }
                 });
