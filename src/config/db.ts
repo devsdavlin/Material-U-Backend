@@ -25,9 +25,9 @@ export const testDbConnection = async (): Promise<void> => {
       throw new Error("La variable de entorno DATABASE_URL no está definida.");
     }
     const result = await prisma.$queryRaw<Array<{ now: Date }>>`SELECT NOW()`;
-      console.log("✅ Conexión a la base de datos establecida (Prisma):", result[0]);
+      console.log("✅ :", result[0]);
   } catch (error) {
-      console.error("❌ Error al conectar a la base de datos con Prisma:", error);
+      console.error("❌: ", error);
       throw error;
   }
 };
