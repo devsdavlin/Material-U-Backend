@@ -18,10 +18,8 @@ export const createUser = async (userData: CreateUserType) => {
         omit: { password_hash: true },
     });
 
-    const token = token_Creation ({
-            name: newUser.name,
-            email: newUser.email,
-            rol: newUser.rol
+    const token = token_Creation({
+        id_user: newUser.id_user,
     });
     return { user: newUser, token };
 };
@@ -41,9 +39,7 @@ export const loginUser = async (loginData: LoginType) => {
     const { password_hash: _excluded, ...safeUser } = user;
     
     const token = token_Creation({
-        name: user.name,
-        email: user.email,
-        rol: user.rol,
+        id_user: user.id_user,
     });
     return {
         message: 'Login exitoso',

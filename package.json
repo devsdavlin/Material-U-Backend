@@ -2,31 +2,32 @@
   "name": "inventario",
   "version": "1.0.0",
   "description": "",
-    "main": "dist/server.js",
-    "scripts": {
-      "dev": "tsx watch src/server.ts",
-      "build": "tsc",
-      "start": "node dist/server.js",
-      "typecheck": "tsc --noEmit",
-      "db:generate": "prisma generate",
-      "db:pull": "prisma db pull",
-      "db:push": "prisma db push",
-      "db:deploy": "prisma migrate deploy",
-      "db:status": "prisma migrate status"
-    },
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:pull": "prisma db pull",
+    "db:push": "prisma db push",
+    "db:deploy": "prisma migrate deploy",
+    "db:status": "prisma migrate status"
+  },
   "keywords": [],
   "type": "module",
   "dependencies": {
-    "@prisma/client": "^6.4.1",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.1",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
-    "zod": "^4.5.2"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^11.17.0",
@@ -34,9 +35,9 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.6.2",
     "@types/pg": "^8.23.1",
-    "prisma": "^6.4.1",
+    "prisma": "^7.10.0",
     "prisma-erd-generator": "^3.2.1",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2"
@@ -44,9 +45,9 @@
   "allowScripts": {
     "bcrypt@6.0.0": true,
     "esbuild@0.28.2": true,
-    "@prisma/client@6.4.1": true,
-    "@prisma/engines@6.4.1": true,
-    "prisma@6.4.1": true,
+    "@prisma/client@7.10.0": true,
+    "@prisma/engines@7.10.0": true,
+    "prisma@7.10.0": true,
     "puppeteer@25.10.0": true
   }
 }

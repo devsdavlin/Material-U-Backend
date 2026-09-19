@@ -6,22 +6,23 @@ export const materialsRules = {
     //schema material name
     MaterialNameRule: z
     .string()
-    .min
-    (3, {message: "El nombre del material debe tener al menos 3 caracteres" })
+    .trim()
+    .min(3, {message: "El nombre del material debe tener al menos 3 caracteres" })
     .max(150, {message: "El nombre del material debe tener como máximo 150 caracteres" }),
 
     //schema category
     CategoryRule: z
     .string()
-    .min
-    (3, {message: "La categoría debe tener al menos 3 caracteres" })
-    .max(150, {message: "La categoría debe tener como máximo 150 caracteres" }),
+    .trim()
+    .min(3, {message: "La categoría debe tener al menos 3 caracteres" })
+    .max(100, {message: "La categoría debe tener como máximo 100 caracteres" }),
      
     //schema unit of measure
     unitRule: z
     .string()
+    .trim()
     .min(1,{message: "La unidad de medida debe tener al menos 1 caracter" })
-    .max(100, {message: "La unidad de medida debe tener como máximo 100 caracteres" }),
+    .max(50, {message: "La unidad de medida debe tener como máximo 50 caracteres" }),
 
     //schema active status
     activeRule: z
@@ -32,6 +33,7 @@ export const materialsRules = {
     //Internal code Rule
     internalCodeRule: z
     .string()
+    .trim()
     .min(1, {message: "El código interno debe tener al menos 1 caracter" })
     .max(50, {message: "El código interno debe tener como máximo 50 caracteres" })
 }

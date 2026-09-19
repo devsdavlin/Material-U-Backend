@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import { userRouter } from './routes/user.routes.js';
+import { materialRouter } from './routes/material.routes.js';
 
 const app = express();
 app.use(express.json());
@@ -10,6 +11,7 @@ app.get('/health', (_req, res) => {
 });
 
 app.use('/api/users', userRouter);
+app.use('/api/materials', materialRouter);
 
 const PORT = Number(process.env.PORT) || 3000;
 app.listen(PORT, () => {
