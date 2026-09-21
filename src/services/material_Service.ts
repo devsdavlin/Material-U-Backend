@@ -1,5 +1,6 @@
 import { prisma } from '../config/db.js';
 import { type CreateMaterialType, type UpdateMaterialType } from '../Validations/materials_schema.js';
+import { AppError, BadRequestError, ConflictError, NotFoundError } from '../utils/errors.js';
 
 const getPrismaCode = (error: unknown): string | undefined => {
     if (typeof error !== 'object' || error === null || !('code' in error)) {
@@ -11,20 +12,16 @@ const getPrismaCode = (error: unknown): string | undefined => {
 
 export const createMaterial = async (materialData: CreateMaterialType) => {
     try {
-        const { internal_code, ...rest } = materialData;
         const material = await prisma.materials.create({
-            data: {
-                ...rest,
-                ...(internal_code !== undefined && { internal_code }),
-            }
-        })
+            data: materialData,
+        });
         return material;
     } catch (error) {
         if (getPrismaCode(error) === 'P2002') {
-            throw new Error('Código interno duplicado');
+            throw new ConflictError('Código interno duplicado');
         }
         console.error('Error al crear el material:', error);
-        throw new Error('Error al crear el material');
+        throw error;
     }
 };
 
@@ -39,7 +36,7 @@ export const updateMaterial = async (id: number, patch: UpdateMaterialType) => {
             ...(internal_code !== undefined && { internal_code }),
         };
         if (Object.keys(data).length === 0) {
-            throw new Error('Sin cambios para actualizar');
+            throw new BadRequestError('Sin cambios para actualizar');
         }
         const material = await prisma.materials.update({
             where: { id_material: id },
@@ -47,36 +44,37 @@ export const updateMaterial = async (id: number, patch: UpdateMaterialType) => {
         });
         return material;
     } catch (error) {
-        const code = getPrismaCode(error);
-        if (code === 'P2025') {
-            throw new Error('Material no encontrado');
-        }
-        if (code === 'P2002') {
-            throw new Error('Código interno duplicado');
-        }
-        if (error instanceof Error && (error.message === 'Material no encontrado' || error.message === 'Sin cambios para actualizar')) {
+        if (error instanceof AppError) {
             throw error;
         }
+        const code = getPrismaCode(error);
+        if (code === 'P2025') {
+            throw new NotFoundError('Material no encontrado');
+        }
+        if (code === 'P2002') {
+            throw new ConflictError('Código interno duplicado');
+        }
         console.error('Error al actualizar el material:', error);
-        throw new Error('Error al actualizar el material');
+        throw error;
     }
 };
 
 export const searchMaterials = async (query: string, limit = 10) => {
     try {
         const q = query.trim();
-        if (!q) {
-            return [];
-        }
         const take = Math.min(Math.max(limit, 1), 50);
         const materials = await prisma.materials.findMany({
             where: {
                 activo: true,
-                OR: [
-                    { material_name: { contains: q, mode: 'insensitive' } },
-                    { internal_code: { contains: q, mode: 'insensitive' } },
-                    { category: { contains: q, mode: 'insensitive' } },
-                ],
+                ...(q
+                    ? {
+                            OR: [
+                                { material_name: { contains: q, mode: 'insensitive' } },
+                                { internal_code: { contains: q, mode: 'insensitive' } },
+                                { category: { contains: q, mode: 'insensitive' } },
+                            ],
+                        }
+                    : {}),
             },
             select: {
                 id_material: true,
@@ -84,6 +82,7 @@ export const searchMaterials = async (query: string, limit = 10) => {
                 internal_code: true,
                 unit: true,
                 category: true,
+                activo: true,
             },
             orderBy: { material_name: 'asc' },
             take,
@@ -91,7 +90,7 @@ export const searchMaterials = async (query: string, limit = 10) => {
         return materials;
     } catch (error) {
         console.error('Error al buscar materiales:', error);
-        throw new Error('Error al buscar materiales');
+        throw error;
     }
 };
 
@@ -100,13 +99,13 @@ export const setMaterialActivo = async (id: number, activo: boolean) => {
         const material = await prisma.materials.update({
             where: { id_material: id },
             data: { activo },
-        })
+        });
         return material;
     } catch (error) {
         if (getPrismaCode(error) === 'P2025') {
-            throw new Error('Material no encontrado');
+            throw new NotFoundError('Material no encontrado');
         }
         console.error('Error al actualizar el estado del material:', error);
-        throw new Error('Error al actualizar el estado del material');
+        throw error;
     }
-}
+};

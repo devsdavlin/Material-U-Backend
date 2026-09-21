@@ -6,7 +6,7 @@ export const createMaterialSchema = z.object({
   category: materialsRules.CategoryRule,
   unit: materialsRules.unitRule,
   activo: materialsRules.activeRule,
-  internal_code: materialsRules.internalCodeRule.optional(),
+  internal_code: materialsRules.internalCodeRule,
 });
 
 export type CreateMaterialType = z.infer<typeof createMaterialSchema>;

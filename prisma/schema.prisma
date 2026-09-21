@@ -48,6 +48,8 @@ model entries {
   materials    materials @relation(fields: [material_id], references: [id_material], onDelete: NoAction, onUpdate: NoAction, map: "fk_entries_material")
   users        User      @relation(fields: [user_id], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "fk_entries_user")
   warehouse    Warehouse @relation(fields: [warehouse_id], references: [id_warehouse], onDelete: NoAction, onUpdate: NoAction, map: "fk_entries_warehouse")
+
+  @@unique([warehouse_id, entry_number], map: "unique_warehouse_entry_number")
 }
 
 model exits {
@@ -64,6 +66,8 @@ model exits {
   materials    materials @relation(fields: [material_id], references: [id_material], onDelete: NoAction, onUpdate: NoAction, map: "fk_exits_material")
   users        User      @relation(fields: [user_id], references: [id_user], onDelete: NoAction, onUpdate: NoAction, map: "fk_exits_user")
   warehouse    Warehouse @relation(fields: [warehouse_id], references: [id_warehouse], onDelete: NoAction, onUpdate: NoAction, map: "fk_exits_warehouse")
+
+  @@unique([warehouse_id, exit_number], map: "unique_warehouse_exit_number")
 }
 
 model inventory {

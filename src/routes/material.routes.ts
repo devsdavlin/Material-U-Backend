@@ -7,7 +7,7 @@ import { createMaterialSchema, updateMaterialSchema } from '../Validations/mater
 
 export const materialRouter = Router();
 
-materialRouter.use(auth, requireRole('Almacenista'));
+materialRouter.use(auth, requireRole('Almacenista', 'Administrador'));
 
 materialRouter.get('/buscar', search);
 materialRouter.post('/', validate_body(createMaterialSchema), create);
