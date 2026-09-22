@@ -1,6 +1,7 @@
 import { type Request, type Response, type NextFunction } from 'express';
 import { createMaterial, updateMaterial, searchMaterials, setMaterialActivo } from '../services/material_Service.js';
 import { BadRequestError } from '../utils/errors.js';
+import { getPaginationParams } from '../utils/pagination.js';
 
 const parseId = (value: unknown): number => {
   const id = Number(value);
@@ -32,9 +33,15 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
 export const search = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const q = typeof req.query.q === 'string' ? req.query.q : '';
-    const limite = req.query.limite !== undefined ? Number(req.query.limite) : 10;
-    const materials = await searchMaterials(q, Number.isNaN(limite) ? 10 : limite);
-    return res.status(200).json({ ok: true, materials });
+    const paginationParams = getPaginationParams(req.query, 10);
+    const result = await searchMaterials(q, paginationParams);
+    
+    res.setHeader('X-Total-Count', result.pagination.total.toString());
+    return res.status(200).json({
+      ok: true,
+      materials: result.items,
+      pagination: result.pagination,
+    });
   } catch (error) {
     next(error);
   }

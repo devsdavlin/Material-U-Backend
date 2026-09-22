@@ -1,5 +1,6 @@
 import { type Request, type Response, type NextFunction } from 'express';
 import { AppError } from '../utils/errors.js';
+import { logger } from '../utils/logger.js';
 
 export const errorHandler = (
   err: unknown,
@@ -41,7 +42,10 @@ export const errorHandler = (
   }
 
   // Error genérico no controlado (500)
-  console.error('❌ Error no controlado:', err);
+  logger.error('Error no controlado', {
+    requestId: _req.id,
+    error: err instanceof Error ? { message: err.message, stack: err.stack } : err,
+  });
   return res.status(500).json({
     ok: false,
     message: 'Error interno del servidor',

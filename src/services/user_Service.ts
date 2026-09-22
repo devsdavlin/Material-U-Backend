@@ -6,7 +6,6 @@ import { token_Creation } from '../utils/tokens.js';
 import { UnauthorizedError, ConflictError } from '../utils/errors.js';
 import { getPrismaCode } from './movement_common.js';
 
-// Crea un usuario nuevo en la base de datos
 export const createUser = async (userData: CreateUserType) => {
     try {
         const newUser = await prisma.user.create({

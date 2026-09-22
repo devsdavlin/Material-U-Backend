@@ -10,6 +10,13 @@ import {
     toNumber,
 } from './movement_common.js';
 import { AppError, ConflictError } from '../utils/errors.js';
+import { invalidateDashboardCache } from './dashboard_Service.js';
+import {
+    getPaginationParams,
+    buildPaginatedResult,
+    type PaginationParams,
+    type PaginatedResult,
+} from '../utils/pagination.js';
 
 // Registra una ENTRADA (llega material a la sede).
 // La persona elige el producto de la lista y escribe número,
@@ -77,6 +84,9 @@ export const createEntry = async (
             return { entry, stock };
         });
 
+        // Invalida caché del dashboard
+        invalidateDashboardCache(warehouse_id);
+
         return {
             entry: {
                 ...result.entry,
@@ -105,28 +115,54 @@ export const createEntry = async (
     }
 };
 
-// Lista las entradas de la sede (las últimas primero).
+export interface EntryItem {
+    id_entry: number;
+    entry_number: string;
+    warehouse_id: number;
+    material_id: number;
+    user_id: number;
+    provider: string | null;
+    quantity: number;
+    unit_value: number;
+    total_value: number;
+    entry_date: Date | null;
+    materials: {
+        material_name: string;
+        internal_code: string | null;
+        unit: string;
+    };
+}
+
+// Lista las entradas de la sede paginadas (las últimas primero).
 export const listMyEntries = async (
     user: AuthUser | undefined,
-    limit = 50,
+    paginationParams?: PaginationParams,
     explicitWarehouseId?: number,
-) => {
+): Promise<PaginatedResult<EntryItem>> => {
     const warehouse_id = getWarehouseId(user, explicitWarehouseId);
-    const take = Math.min(Math.max(limit, 1), 100);
-    const rows = await prisma.entries.findMany({
-        where: { warehouse_id },
-        include: {
-            materials: {
-                select: { material_name: true, internal_code: true, unit: true },
+    const params = paginationParams ?? getPaginationParams({}, 20);
+
+    const [total, rows] = await Promise.all([
+        prisma.entries.count({ where: { warehouse_id } }),
+        prisma.entries.findMany({
+            where: { warehouse_id },
+            include: {
+                materials: {
+                    select: { material_name: true, internal_code: true, unit: true },
+                },
             },
-        },
-        orderBy: { id_entry: 'desc' },
-        take,
-    });
-    return rows.map((r) => ({
+            orderBy: { id_entry: 'desc' },
+            skip: params.skip,
+            take: params.take,
+        }),
+    ]);
+
+    const items: EntryItem[] = rows.map((r) => ({
         ...r,
         quantity: toNumber(r.quantity),
         unit_value: toNumber(r.unit_value),
         total_value: toNumber(r.total_value),
     }));
+
+    return buildPaginatedResult(items, total, params);
 };

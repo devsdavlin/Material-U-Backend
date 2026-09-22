@@ -1,6 +1,13 @@
 import { prisma } from '../config/db.js';
 import { type CreateMaterialType, type UpdateMaterialType } from '../Validations/materials_schema.js';
 import { AppError, BadRequestError, ConflictError, NotFoundError } from '../utils/errors.js';
+import {
+    getPaginationParams,
+    buildPaginatedResult,
+    type PaginationParams,
+    type PaginatedResult,
+} from '../utils/pagination.js';
+import type { Prisma } from '../generated/prisma/client.js';
 
 const getPrismaCode = (error: unknown): string | undefined => {
     if (typeof error !== 'object' || error === null || !('code' in error)) {
@@ -59,35 +66,55 @@ export const updateMaterial = async (id: number, patch: UpdateMaterialType) => {
     }
 };
 
-export const searchMaterials = async (query: string, limit = 10) => {
+export interface MaterialItem {
+    id_material: number;
+    material_name: string;
+    internal_code: string | null;
+    unit: string;
+    category: string;
+    activo: boolean | null;
+}
+
+export const searchMaterials = async (
+    query: string,
+    paginationParams?: PaginationParams,
+): Promise<PaginatedResult<MaterialItem>> => {
     try {
         const q = query.trim();
-        const take = Math.min(Math.max(limit, 1), 50);
-        const materials = await prisma.materials.findMany({
-            where: {
-                activo: true,
-                ...(q
-                    ? {
-                            OR: [
-                                { material_name: { contains: q, mode: 'insensitive' } },
-                                { internal_code: { contains: q, mode: 'insensitive' } },
-                                { category: { contains: q, mode: 'insensitive' } },
-                            ],
-                        }
-                    : {}),
-            },
-            select: {
-                id_material: true,
-                material_name: true,
-                internal_code: true,
-                unit: true,
-                category: true,
-                activo: true,
-            },
-            orderBy: { material_name: 'asc' },
-            take,
-        });
-        return materials;
+        const params = paginationParams ?? getPaginationParams({}, 20);
+
+        const whereClause: Prisma.materialsWhereInput = {
+            activo: true,
+            ...(q
+                ? {
+                        OR: [
+                            { material_name: { contains: q, mode: 'insensitive' } },
+                            { internal_code: { contains: q, mode: 'insensitive' } },
+                            { category: { contains: q, mode: 'insensitive' } },
+                        ],
+                    }
+                : {}),
+        };
+
+        const [total, materials] = await Promise.all([
+            prisma.materials.count({ where: whereClause }),
+            prisma.materials.findMany({
+                where: whereClause,
+                select: {
+                    id_material: true,
+                    material_name: true,
+                    internal_code: true,
+                    unit: true,
+                    category: true,
+                    activo: true,
+                },
+                orderBy: { material_name: 'asc' },
+                skip: params.skip,
+                take: params.take,
+            }),
+        ]);
+
+        return buildPaginatedResult(materials, total, params);
     } catch (error) {
         console.error('Error al buscar materiales:', error);
         throw error;

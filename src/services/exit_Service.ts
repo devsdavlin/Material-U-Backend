@@ -10,6 +10,13 @@ import {
     toNumber,
 } from './movement_common.js';
 import { AppError, BadRequestError, ConflictError } from '../utils/errors.js';
+import { invalidateDashboardCache } from './dashboard_Service.js';
+import {
+    getPaginationParams,
+    buildPaginatedResult,
+    type PaginationParams,
+    type PaginatedResult,
+} from '../utils/pagination.js';
 
 // Registra una SALIDA (sale material de la sede hacia un destino en obra).
 // La persona elige el producto de la lista y escribe número,
@@ -86,6 +93,9 @@ export const createExit = async (
             return { exit, stock };
         });
 
+        // Invalida caché del dashboard
+        invalidateDashboardCache(warehouse_id);
+
         return {
             exit: {
                 ...result.exit,
@@ -114,28 +124,63 @@ export const createExit = async (
     }
 };
 
-// Lista las salidas de la sede (las últimas primero).
+export interface ExitItem {
+    id_exit: number;
+    exit_number: string;
+    warehouse_id: number;
+    material_id: number;
+    user_id: number;
+    cost_center: string | null;
+    quantity: number;
+    unit_value: number;
+    total_value: number;
+    exit_date: Date | null;
+    materials: {
+        material_name: string;
+        internal_code: string | null;
+        unit: string;
+    };
+}
+
+// Lista las salidas de la sede paginadas (las últimas primero).
 export const listMyExits = async (
     user: AuthUser | undefined,
-    limit = 50,
+    paginationParams?: PaginationParams,
     explicitWarehouseId?: number,
-) => {
+    filters: { cost_center?: string | undefined } = {},
+): Promise<PaginatedResult<ExitItem>> => {
     const warehouse_id = getWarehouseId(user, explicitWarehouseId);
-    const take = Math.min(Math.max(limit, 1), 100);
-    const rows = await prisma.exits.findMany({
-        where: { warehouse_id },
-        include: {
-            materials: {
-                select: { material_name: true, internal_code: true, unit: true },
+    const params = paginationParams ?? getPaginationParams({}, 20);
+    const costCenter = (filters.cost_center ?? '').trim();
+
+    const whereClause: Prisma.exitsWhereInput = {
+        warehouse_id,
+        ...(costCenter
+            ? { cost_center: { contains: costCenter, mode: 'insensitive' } }
+            : {}),
+    };
+
+    const [total, rows] = await Promise.all([
+        prisma.exits.count({ where: whereClause }),
+        prisma.exits.findMany({
+            where: whereClause,
+            include: {
+                materials: {
+                    select: { material_name: true, internal_code: true, unit: true },
+                },
             },
-        },
-        orderBy: { id_exit: 'desc' },
-        take,
-    });
-    return rows.map((r) => ({
+            orderBy: { id_exit: 'desc' },
+            skip: params.skip,
+            take: params.take,
+        }),
+    ]);
+
+    const items: ExitItem[] = rows.map((r) => ({
         ...r,
         quantity: toNumber(r.quantity),
         unit_value: toNumber(r.unit_value),
         total_value: toNumber(r.total_value),
     }));
+
+    return buildPaginatedResult(items, total, params);
 };
