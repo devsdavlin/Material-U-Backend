@@ -11,6 +11,7 @@ import { entryRouter } from './routes/entry.routes.js';
 import { exitRouter } from './routes/exit.routes.js';
 import { inventoryRouter } from './routes/inventory.routes.js';
 import { dashboardRouter } from './routes/dashboard.routes.js';
+import { warehouseRouter } from './routes/warehouse.routes.js';
 import { errorHandler, notFoundHandler } from './middlewares/errors_m.js';
 import { requestLogger } from './middlewares/logger_m.js';
 import { logger } from './utils/logger.js';
@@ -93,6 +94,7 @@ app.use('/api/entries', movementLimiter, entryRouter);
 app.use('/api/exits', movementLimiter, exitRouter);
 app.use('/api/inventory', inventoryRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/warehouses', warehouseRouter);
 
 // Manejador 404 para rutas inexistentes
 app.use(notFoundHandler);
