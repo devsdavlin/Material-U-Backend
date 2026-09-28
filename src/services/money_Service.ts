@@ -4,7 +4,7 @@ import { NotFoundError } from '../utils/errors.js';
 import { getWarehouseId, toNumber } from './movement_common.js';
 
 // Plata acumulada de UNA sede: cuánto entró, cuánto salió y cuánto queda.
-// Solo suma (lectura), no mueve stock ni toca nada.
+// Ejecuta las consultas en paralelo para reducir round-trips a la BD.
 
 export interface MoneyBySede {
     sede: { id_warehouse: number; warehouse_name: string };
@@ -19,15 +19,12 @@ export const getMoneyBySede = async (
 ): Promise<MoneyBySede> => {
     const warehouse_id = getWarehouseId(user, opts.warehouse_id);
 
-    const sede = await prisma.warehouse.findUnique({
-        where: { id_warehouse: warehouse_id },
-        select: { id_warehouse: true, warehouse_name: true },
-    });
-    if (!sede) {
-        throw new NotFoundError('Sede no encontrada');
-    }
-
-    const [entradas, salidas] = await Promise.all([
+    // Ejecución paralela de sede y agregaciones en un solo roundtrip
+    const [sede, entradas, salidas] = await Promise.all([
+        prisma.warehouse.findUnique({
+            where: { id_warehouse: warehouse_id },
+            select: { id_warehouse: true, warehouse_name: true },
+        }),
         prisma.entries.aggregate({
             where: { warehouse_id },
             _sum: { total_value: true },
@@ -37,6 +34,10 @@ export const getMoneyBySede = async (
             _sum: { total_value: true },
         }),
     ]);
+
+    if (!sede) {
+        throw new NotFoundError('Sede no encontrada');
+    }
 
     const plataEntradas = toNumber(entradas._sum.total_value ?? 0);
     const plataSalidas = toNumber(salidas._sum.total_value ?? 0);
