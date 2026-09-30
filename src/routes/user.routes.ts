@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { login, register } from '../controllers/user_Controller.js';
+import { login, register, list } from '../controllers/user_Controller.js';
 import { auth } from '../middlewares/auth.js';
 import { requireRole } from '../middlewares/Auth_rol.js';
 import { validate_body } from '../middlewares/validate_body.js';
@@ -10,6 +10,9 @@ export const userRouter = Router();
 
 // Entrar (público).
 userRouter.post('/login', validate_body(loginSchema), login);
+
+// Listar usuarios (solo Administrador, con sesión iniciada).
+userRouter.get('/', auth, requireRole('Administrador'), list);
 
 // Crear usuario (solo Administrador, con sesión iniciada).
 userRouter.post(

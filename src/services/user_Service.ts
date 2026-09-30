@@ -55,3 +55,21 @@ export const loginUser = async (loginData: LoginType) => {
         token,
     };
 };
+
+//Lista de usuarios
+export const list_user = async () => {
+  const list = await prisma.user.findMany({
+    select: {
+      id_user: true,
+      name: true,
+      email: true,
+      rol: true,
+      activo: true,
+      warehouse: {
+        select: { id_warehouse: true, warehouse_name: true },
+      },
+    },
+    orderBy: { name: 'asc' },
+  });
+  return list;
+};

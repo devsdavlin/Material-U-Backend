@@ -1,11 +1,22 @@
 import { type Request, type Response, type NextFunction } from 'express';
-import { loginUser, createUser } from '../services/user_Service.js';
+import { loginUser, createUser, list_user } from '../services/user_Service.js';
 
 // POST /api/users/login -> entrar (público, con límite de intentos).
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await loginUser(req.body);
     return res.status(200).json({ ok: true, ...result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET /api/users -> listar usuarios (solo Administrador).
+// Sin claves: el service nunca devuelve password_hash.
+export const list = async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const users = await list_user();
+    return res.status(200).json({ ok: true, users });
   } catch (error) {
     next(error);
   }
