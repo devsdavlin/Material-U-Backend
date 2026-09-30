@@ -2,6 +2,7 @@ import { prisma } from '../config/db.js';
 import type { AuthUser } from '../types/express.js';
 import { NotFoundError } from '../utils/errors.js';
 import { getWarehouseId, toNumber } from './movement_common.js';
+import { invalidateDashboardCache } from './dashboard_Service.js';
 
 export type EstadoFiltro = 'todos' | 'agotado' | 'bajo_minimo' | 'con_stock';
 
@@ -183,6 +184,9 @@ export const setMinStock = async (
         update: { min_stock: minStock },
         create: { warehouse_id, material_id: materialId, current_stock: 0, min_stock: minStock },
     });
+
+    // El mínimo cambió: el tablero de esa sede debe recalcularse ya
+    invalidateDashboardCache(warehouse_id);
 
     const stock = toNumber(row.current_stock);
     const min = toNumber(row.min_stock);

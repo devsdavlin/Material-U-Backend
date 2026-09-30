@@ -8,6 +8,7 @@ import {
     type PaginatedResult,
 } from '../utils/pagination.js';
 import type { Prisma } from '../generated/prisma/client.js';
+import { invalidateDashboardCache } from './dashboard_Service.js';
 
 const getPrismaCode = (error: unknown): string | undefined => {
     if (typeof error !== 'object' || error === null || !('code' in error)) {
@@ -49,6 +50,8 @@ export const updateMaterial = async (id: number, patch: UpdateMaterialType) => {
             where: { id_material: id },
             data,
         });
+        // El material aparece en el tablero de todas las sedes
+        invalidateDashboardCache();
         return material;
     } catch (error) {
         if (error instanceof AppError) {
@@ -127,6 +130,7 @@ export const setMaterialActivo = async (id: number, activo: boolean) => {
             where: { id_material: id },
             data: { activo },
         });
+        invalidateDashboardCache();
         return material;
     } catch (error) {
         if (getPrismaCode(error) === 'P2025') {
