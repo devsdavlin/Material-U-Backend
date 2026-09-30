@@ -3,7 +3,7 @@ import { type CreateUserType } from '../Validations/createUser_schema.js';
 import { type LoginType } from '../Validations/login_schema.js';
 import { prisma } from '../config/db.js';
 import { token_Creation } from '../utils/tokens.js';
-import { UnauthorizedError, ConflictError } from '../utils/errors.js';
+import { UnauthorizedError, ConflictError, NotFoundError } from '../utils/errors.js';
 import { getPrismaCode } from './movement_common.js';
 
 export const createUser = async (userData: CreateUserType) => {
@@ -72,4 +72,21 @@ export const list_user = async () => {
     orderBy: { name: 'asc' },
   });
   return list;
+};
+
+// Prende o apaga un usuario (desactivar = pierde acceso, conserva historial).
+export const setUserActivo = async (id: number, activo: boolean) => {
+  try {
+    const user = await prisma.user.update({
+      where: { id_user: id },
+      data: { activo },
+      omit: { password_hash: true },
+    });
+    return user;
+  } catch (error) {
+    if (getPrismaCode(error) === 'P2025') {
+      throw new NotFoundError('Usuario no encontrado');
+    }
+    throw error;
+  }
 };

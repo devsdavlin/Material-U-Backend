@@ -1,5 +1,6 @@
 import { type Request, type Response, type NextFunction } from 'express';
-import { loginUser, createUser, list_user } from '../services/user_Service.js';
+import { loginUser, createUser, list_user, setUserActivo } from '../services/user_Service.js';
+import { BadRequestError } from '../utils/errors.js';
 
 // POST /api/users/login -> entrar (público, con límite de intentos).
 export const login = async (req: Request, res: Response, next: NextFunction) => {
@@ -29,6 +30,43 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
   try {
     const { user } = await createUser(req.body);
     return res.status(201).json({ ok: true, user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const parseId = (value: unknown): number | null => {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
+};
+
+// PATCH /api/users/:id/desactivar -> apagar acceso (solo Administrador).
+// No borra: conserva el historial de movimientos. Nadie puede apagarse solo.
+export const deactivate = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = parseId(req.params.id);
+    if (id === null) {
+      throw new BadRequestError('ID de usuario inválido');
+    }
+    if (req.user?.id_user === id) {
+      throw new BadRequestError('No puedes desactivar tu propia cuenta');
+    }
+    const user = await setUserActivo(id, false);
+    return res.status(200).json({ ok: true, user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// PATCH /api/users/:id/reactivar -> prender acceso (solo Administrador).
+export const reactivate = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = parseId(req.params.id);
+    if (id === null) {
+      throw new BadRequestError('ID de usuario inválido');
+    }
+    const user = await setUserActivo(id, true);
+    return res.status(200).json({ ok: true, user });
   } catch (error) {
     next(error);
   }
