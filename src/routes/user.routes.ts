@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { login, register, list, deactivate, reactivate } from '../controllers/user_Controller.js';
+import { login, register, list, update, deactivate, reactivate } from '../controllers/user_Controller.js';
 import { auth } from '../middlewares/auth.js';
 import { requireRole } from '../middlewares/Auth_rol.js';
 import { validate_body } from '../middlewares/validate_body.js';
 import { loginSchema } from '../Validations/login_schema.js';
 import { createUserSchema } from '../Validations/createUser_schema.js';
+import { updateUserSchema } from '../Validations/updateUser_schema.js';
 
 export const userRouter = Router();
 
@@ -25,3 +26,6 @@ userRouter.post(
 // Apagar / prender acceso (solo Administrador). No borra el historial.
 userRouter.patch('/:id/desactivar', auth, requireRole('Administrador'), deactivate);
 userRouter.patch('/:id/reactivar', auth, requireRole('Administrador'), reactivate);
+
+// Editar usuario: nombre, correo, contraseña o sede (solo Administrador).
+userRouter.put('/:id', auth, requireRole('Administrador'), validate_body(updateUserSchema), update);

@@ -1,5 +1,5 @@
 import { type Request, type Response, type NextFunction } from 'express';
-import { loginUser, createUser, list_user, setUserActivo } from '../services/user_Service.js';
+import { loginUser, createUser, list_user, setUserActivo, updateUser } from '../services/user_Service.js';
 import { BadRequestError } from '../utils/errors.js';
 
 // POST /api/users/login -> entrar (público, con límite de intentos).
@@ -66,6 +66,20 @@ export const reactivate = async (req: Request, res: Response, next: NextFunction
       throw new BadRequestError('ID de usuario inválido');
     }
     const user = await setUserActivo(id, true);
+    return res.status(200).json({ ok: true, user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// PUT /api/users/:id -> editar nombre, correo, contraseña o sede (solo Administrador).
+export const update = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = parseId(req.params.id);
+    if (id === null) {
+      throw new BadRequestError('ID de usuario inválido');
+    }
+    const user = await updateUser(id, req.body);
     return res.status(200).json({ ok: true, user });
   } catch (error) {
     next(error);

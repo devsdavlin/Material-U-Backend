@@ -1,9 +1,10 @@
 import bcrypt from 'bcrypt';
 import { type CreateUserType } from '../Validations/createUser_schema.js';
+import { type UpdateUserType } from '../Validations/updateUser_schema.js';
 import { type LoginType } from '../Validations/login_schema.js';
 import { prisma } from '../config/db.js';
 import { token_Creation } from '../utils/tokens.js';
-import { UnauthorizedError, ConflictError, NotFoundError } from '../utils/errors.js';
+import { UnauthorizedError, ConflictError, NotFoundError, BadRequestError } from '../utils/errors.js';
 import { getPrismaCode } from './movement_common.js';
 
 export const createUser = async (userData: CreateUserType) => {
@@ -87,6 +88,43 @@ export const setUserActivo = async (id: number, activo: boolean) => {
     if (getPrismaCode(error) === 'P2025') {
       throw new NotFoundError('Usuario no encontrado');
     }
+    throw error;
+  }
+};
+
+// Edita nombre, correo, contraseña y/o sede. Solo cambia lo que se envía.
+export const updateUser = async (id: number, data: UpdateUserType) => {
+  if (data.warehouse_id !== undefined) {
+    const warehouse = await prisma.warehouse.findUnique({
+      where: { id_warehouse: data.warehouse_id },
+      select: { activo: true },
+    });
+    if (!warehouse || warehouse.activo === false) {
+      throw new BadRequestError('La sede seleccionada no existe o está inactiva');
+    }
+  }
+  try {
+    return await prisma.user.update({
+      where: { id_user: id },
+      data: {
+        ...(data.username !== undefined && { name: data.username }),
+        ...(data.email !== undefined && { email: data.email }),
+        ...(data.password !== undefined && { password_hash: await bcrypt.hash(data.password, 10) }),
+        ...(data.warehouse_id !== undefined && { warehouse_id: data.warehouse_id }),
+      },
+      select: {
+        id_user: true,
+        name: true,
+        email: true,
+        rol: true,
+        activo: true,
+        warehouse: { select: { id_warehouse: true, warehouse_name: true } },
+      },
+    });
+  } catch (error) {
+    const code = getPrismaCode(error);
+    if (code === 'P2025') throw new NotFoundError('Usuario no encontrado');
+    if (code === 'P2002') throw new ConflictError('El correo electrónico ya está registrado');
     throw error;
   }
 };
